@@ -6,14 +6,15 @@ public class PlayerController : MonoBehaviour
     private InputAction move;
     [SerializeField] private float rotationSpeed = 30, moveSpeed = 20;
     private Rigidbody rb;
-    
+    public static Transform playerPos;
     
 
     void Awake()
     {
         move = InputSystem.actions.FindAction("Player/Move");
         rb = GetComponent<Rigidbody>();
-        
+        playerPos = transform;
+
     }
     
     void FixedUpdate()
