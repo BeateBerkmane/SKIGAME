@@ -23,6 +23,14 @@ public class GameManager : MonoBehaviour
         FinishGate.FinishRace += FinishRace;
         SlalomFlag.RacePenalty += AddRacePenalty;
     }
+
+    private void OnDisable()
+    {
+        StartGate.StartRace -= StartRace;
+        FinishGate.FinishRace -= FinishRace;
+        SlalomFlag.RacePenalty -= AddRacePenalty;
+    }
+
     private void Start()
     {
         int bestTimeInt = PlayerPrefs.GetInt(bestTimeKey,int.MaxValue);
@@ -34,22 +42,24 @@ public class GameManager : MonoBehaviour
         PenaltyTime += new TimeSpan(0, 0, 3);
     }
 
-    void StartRace()
-    {
-        racing = true;
-        raceStart = DateTime.Now;
-        Debug.Log("starting race from game manager");
-    }
-
+    
     void FinishRace()
     {
+        Debug.Log("finishing race from game manager");
         racing = false;
+        GameData.Instance.AddLevelTime((float)raceTime.TotalMilliseconds / 1000f);
         if (raceTime < bestTime)
         {
+            BestTimeText.text = "Best time" + raceTime.ToString("mm\\:ss");
             PlayerPrefs.SetInt(bestTimeKey, (int)raceTime.Ticks);
             PlayerPrefs.Save();
         }
-    }
+    } void StartRace()
+         {
+             racing = true;
+             raceStart = DateTime.Now;
+             Debug.Log("starting race from game manager");
+         }
     void Update()
     {
         if (racing)
