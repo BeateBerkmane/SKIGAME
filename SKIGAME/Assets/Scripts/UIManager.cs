@@ -58,7 +58,7 @@ public class UIManager : MonoBehaviour
     {
         while (overlay.alpha < 1.0f)
         {
-            overlay.alpha += Time.deltaTime * fadeSpeed;
+            overlay.alpha += Time.unscaledDeltaTime * fadeSpeed;
             yield return null;
         }
     }
@@ -67,7 +67,7 @@ public class UIManager : MonoBehaviour
     {
         while (overlay.alpha > 0f)
         {
-            overlay.alpha -= Time.deltaTime * fadeSpeed;
+            overlay.alpha -= Time.unscaledDeltaTime * fadeSpeed;
             yield return null;
         }
     }
@@ -88,6 +88,7 @@ public class UIManager : MonoBehaviour
 
     public void Quit()
     {
+        Time.timeScale = 1f;
         StartCoroutine(QuitCoroutine());
     }
 
