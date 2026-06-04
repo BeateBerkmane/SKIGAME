@@ -61,8 +61,7 @@ public class PlayerController : MonoBehaviour
             1.4f,
             groundLayers
         );
-
-        Debug.Log("Grounded = " + isGrounded);
+        
    
 
         Color col = isGrounded ? Color.green : Color.red;
