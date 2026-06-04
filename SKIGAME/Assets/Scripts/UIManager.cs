@@ -1,25 +1,41 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
-using System.Collections;
 using UnityEngine.SceneManagement;
+
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private CanvasGroup overlay;
-
     [SerializeField] private float fadeSpeed = 0.5f;
 
     [SerializeField] private GameObject gameOverMenu;
     [SerializeField] private int nextLevelIndex;
+
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public static UIManager Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    [SerializeField] private TMP_Text finalTimeText;
+
+    public void ShowFinalTime(float time)
+    {
+        finalTimeText.text = "TIME " + time.ToString("F2");
+    }
+
     void Start()
     {
         gameOverMenu.SetActive(false);
         overlay.gameObject.SetActive(true);
+        overlay.alpha = 1f;
         StartCoroutine(FadeOutOverlay());
         
+
     }
 
     private void OnEnable()
@@ -30,6 +46,12 @@ public class UIManager : MonoBehaviour
     private void OnDisable()
     {
         FinishGate.FinishRace -= FinishRaceUI;
+    }
+
+    private void FinishRaceUI()
+    {
+        gameOverMenu.SetActive(true);
+        Time.timeScale = 0f; 
     }
 
     private IEnumerator FadeInOverlay()
@@ -53,42 +75,38 @@ public class UIManager : MonoBehaviour
     public void Retry()
 
     {
+        Time.timeScale = 1f;
         StartCoroutine(RetryCoroutine());
     }
 
-    private IEnumerator RetryCourutine()
+    private IEnumerator RetryCoroutine()
     {
         yield return StartCoroutine(FadeInOverlay());
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        
+
     }
 
     public void Quit()
-
-
     {
         StartCoroutine(QuitCoroutine());
     }
-    
-    private IEnumerator QuitCourutine()
+
+    private IEnumerator QuitCoroutine()
     {
         yield return StartCoroutine(FadeInOverlay());
-        SceneManager.LoadScene(NextLevelIndex);
+        Application.Quit();
+    }
+
 
     public void NextLevel()
-
     {
+        Time.timeScale = 1f;
         StartCoroutine(NextLevelCoroutine());
     }
-    private IEnumerator NextLevelCourutine()
+
+    private IEnumerator NextLevelCoroutine()
     {
         yield return StartCoroutine(FadeInOverlay());
-        SceneManager.LoadScene();
-        
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
+        SceneManager.LoadScene(nextLevelIndex);
     }
 }

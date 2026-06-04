@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameData : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class GameData : MonoBehaviour
     {
         for (int i = 0; i < 5; i++)
         {
-            float time = PlayerPrefs.GetFloat(leaderboardKey+i, 999.99f);
+            float time = PlayerPrefs.GetFloat(leaderboardKey + i, 999.99f);
             bestTimes.Add(time);
         }
 
@@ -36,7 +37,7 @@ public class GameData : MonoBehaviour
     {
         for (int i = 0; i < 5; i++)
         {
-            if(i<= bestTimes.Count) 
+            if (i< bestTimes.Count) 
                 PlayerPrefs.SetFloat(leaderboardKey+i, bestTimes[i]);
         }
         PlayerPrefs.Save();

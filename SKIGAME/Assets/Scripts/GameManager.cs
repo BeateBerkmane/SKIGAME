@@ -11,12 +11,12 @@ public class GameManager : MonoBehaviour
     private TimeSpan penaltyTime;
     private bool racing = false;
     private TimeSpan bestTime;
-
-    public delegate void TimerEvent();
-    [SerializeField] private TMP_Text timerText, besTimetext;
+    
+    [SerializeField] private TMP_Text timerText, bestTimeText;
     [SerializeField] private string bestTimeKey = "BestTimeLVL1";
 
         
+    
     private void OnEnable()
     {
         StartGate.StartRace += StartRace;
@@ -35,37 +35,40 @@ public class GameManager : MonoBehaviour
     {
         int bestTimeInt = PlayerPrefs.GetInt(bestTimeKey,int.MaxValue);
         bestTime = new TimeSpan((long)bestTimeInt);
-        bestTimetext.text = "BEST TIME" + raceTime.ToString("mm\\:ss");
+        bestTimeText.text = "BEST TIME: " + bestTime.ToString("mm\\:ss");
     }
     void AddRacePenalty()
     {
-        PenaltyTime += new TimeSpan(0, 0, 3);
+        penaltyTime += new TimeSpan(0, 0, 1);
     }
 
-    
+    void StartRace()
+    {
+        racing = true;
+        raceStart = DateTime.Now;
+        Debug.Log("starting race from game manager");
+    }
     void FinishRace()
     {
         Debug.Log("finishing race from game manager");
         racing = false;
-        GameData.Instance.AddLevelTime((float)raceTime.TotalMilliseconds / 1000f);
+        float finalTime = (float)raceTime.TotalSeconds;
+        GameData.Instance.AddLevelTime(finalTime);
+        FindObjectOfType<LeaderboardUI>()?.UpdateLeaderboard();
         if (raceTime < bestTime)
         {
-            BestTimeText.text = "Best time" + raceTime.ToString("mm\\:ss");
+            bestTimeText.text = "BEST TIME: " + raceTime.ToString("mm\\:ss");
             PlayerPrefs.SetInt(bestTimeKey, (int)raceTime.Ticks);
             PlayerPrefs.Save();
+            UIManager.Instance.ShowFinalTime((float)raceTime.TotalSeconds);
         }
-    } void StartRace()
-         {
-             racing = true;
-             raceStart = DateTime.Now;
-             Debug.Log("starting race from game manager");
-         }
+    } 
+   
     void Update()
     {
         if (racing)
             raceTime = DateTime.Now - raceStart + penaltyTime;
-        timerText.text = "TIME" + raceTime.ToString("mm\\:ss");
-        raceTime
+        timerText.text = "TIME: " + raceTime.ToString("mm\\:ss");
 
     }
 }

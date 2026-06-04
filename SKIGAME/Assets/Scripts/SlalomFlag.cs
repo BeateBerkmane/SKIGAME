@@ -1,32 +1,26 @@
 using UnityEngine;
+using System;
 
 public class SlalomFlag : MonoBehaviour
 {
     private enum Direction { Left, Right };
-    [SerializeField] private Direction flagDirection;
-    private bool flagPassed = false;
+    [SerializeField] private Direction flagDirection; 
     [SerializeField] private Material goodMat, badMat;
-    public static event
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    private bool flagPassed = false;
+    public static event Action RacePenalty;
 
-    // Update is called once per frame
-    void Update()
+        void Update()
     {
-        
-        if (PlayerControlle.playerPos != null &&
-            PlayerControlle.playerPos.posiotion.z < transform.position.z && 
+
+        if (PlayerController.playerPos != null &&
+            PlayerController.playerPos.position.z < transform.position.z &&
             !flagPassed)
         {
             flagPassed = true;
             Direction passingDirection = Direction.Right;
-            if (PlayerControlle.playerPos.posiotion.x < transform.position.x)
+            if (PlayerController.playerPos.position.x < transform.position.x)
                 passingDirection = Direction.Left;
-            MeshRenderer meshRenderer = GetComponent<MeshRenderer>(); 
+            MeshRenderer rendered = GetComponent<MeshRenderer>();
             if (passingDirection == flagDirection)
             {
                 rendered.material = goodMat;
@@ -34,9 +28,10 @@ public class SlalomFlag : MonoBehaviour
             else
             {
                 rendered.material = badMat;
-                RacePenalty.Invoke()
+                RacePenalty?.Invoke();
             }
-            
+
         }
     }
 }
+

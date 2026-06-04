@@ -4,11 +4,19 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     private InputAction move;
-    [SerializeField] private float rotationSpeed = 30, moveSpeed = 20;
-    private Rigidbody rb;
-    public static Transform playerPos;
-    private Animator Anim;
 
+    [SerializeField] private float rotationSpeed = 12f;   
+    [SerializeField] private float moveSpeed = -5f;       
+    [SerializeField] private bool isGrounded = true;
+    [SerializeField] private LayerMask groundLayers;
+    [SerializeField] private Vector3 pushbackForce;
+    [SerializeField] private bool disabled = false;
+    [SerializeField] private float disableTime = 0.7f;
+    private float lastDisableTime;
+
+    public static Transform playerPos;
+    private Rigidbody rb;
+    private Animator Anim;
 
     void Awake()
     {
@@ -16,31 +24,69 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         Anim = GetComponent<Animator>();
         playerPos = transform;
-
-
     }
 
+    private void OnEnable()
+    {
+        move?.Enable();
+        Obstacle.OnPlayerHit += TakeDamage;   
+    }
+
+    private void OnDisable()
+    {
+        move?.Disable();
+        Obstacle.OnPlayerHit -= TakeDamage;   
+    }
+    
+    void TakeDamage()
+    {
+        rb.AddForce(pushbackForce, ForceMode.Impulse); 
+        disabled = true;
+        lastDisableTime = Time.timeSinceLevelLoad;
+        Debug.Log("I got Hit");
+    }
+
+    public void DisableMovement(float time)
+    {
+        disabled = true;
+        lastDisableTime = Time.timeSinceLevelLoad;
+    }
+    
     void FixedUpdate()
     {
-        Debug.DrawLine(transform.position,
-            transform.position - transform.up, Color.red);
-        isGrounded = Physics.Linecast(Transform.position,
-            transform.position - transform.up, groundLayers);
+
+        isGrounded = Physics.Raycast(
+            transform.position + Vector3.up * 0.2f,
+            Vector3.down,
+            1.4f,
+            groundLayers
+        );
+
+        Debug.Log("Grounded = " + isGrounded);
+   
+
+        Color col = isGrounded ? Color.green : Color.red;
+        Debug.DrawLine(transform.position, transform.position + Vector3.down, col);
+        
         if (Time.timeSinceLevelLoad > lastDisableTime + disableTime)
             disabled = false;
+
         if (isGrounded && !disabled)
         {
-            Vector2 moveVector = move.ReadValue<Vector2>();
-            float slopeAngle = Mathf.Abs(transform.localEulerAngles.y - 180);
-            float speedMultiplier = Mathf.Cos(Mathf.Deg2Rad * slopeAngle);
-            rb.AddForce(transform.forward * (moveSpeed * speedMultiplier * Time.fixedDeltaTime));
-            //Debug.Log("move x: " + moveVector.x + "move y:" + moveVector.y);
-            transform.Rotate(0, moveVector.x * rotationSpeed * Time.fixedDeltaTime, 0);
+            Vector2 moveInput = move.ReadValue<Vector2>();
+
+         
+            transform.Rotate(0, moveInput.x * rotationSpeed * Time.fixedDeltaTime, 0);
+            
+            float turnAngle = Mathf.Abs(180 - transform.localEulerAngles.y);
+            float speedMult = Mathf.Cos(turnAngle * Mathf.Deg2Rad);
+
+         
+            rb.AddForce(transform.forward * moveSpeed * speedMult * Time.fixedDeltaTime);
         }
 
+        
         Anim.SetBool("grounded", isGrounded);
-        Anim.SetFloat("playerspeed", rb.linearVelocity.magnitude);
-        ///Debug.Log("slope angle:" + slopeAngle + "sin:" + Mathf.Sin(slopeAngle) + ", cos:" + Mathf.Cos(slopeAngle));
-        Debug.Log("Speed:" + rb.linearVelocity.magnitude);
+        Anim.SetFloat("playerspeed", rb.velocity.magnitude); 
     }
 }
