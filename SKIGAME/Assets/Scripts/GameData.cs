@@ -31,6 +31,7 @@ public class GameData : MonoBehaviour
         }
 
         bestTimes.Sort();
+        bestTimes.RemoveAll(t => t >= 999f);
     }
 
     private void SaveLeaderboard()
